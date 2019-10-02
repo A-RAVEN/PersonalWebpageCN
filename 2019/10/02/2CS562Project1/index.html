@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Head tag -->
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Title -->
+  
+  <title>CS562 Project1 - FAN JIN&#39;S PORTFOLIO</title>
+
+  <!--Favicon-->
+  <link rel="icon" href="favicon/favicon.ico">
+
+  <!--Description-->
+  
+      <meta name="description" content="FrameworkSince this summer, I start learning Vulkan API and preparing for the coming game project (GAM550). In three months I made a simple wrap of Vu">
+  
+
+  <!--Author-->
+  
+      <meta name="author" content="Fan Jin">
+  
+
+  <!-- Pure CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css?family=Crimson+Text|Open+Sans:300,800" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/PersonalWebpageCN/css/styles.css">
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+
+  <!-- Google Analytics -->
+  
+
+</head>
+
+
+  <body>
+  	<div class="container-fluid navbar-container m-sm-5">
+      <!-- Header -->
+      <nav class="navbar navbar-toggleable-sm navbar-light px-1 py-3 my-3 mb-sm-5">
+  <a class="navbar-brand ml-2" href="/PersonalWebpageCN/">FAN JIN'S PORTFOLIO</a>
+  <button class="navbar-toggler navbar-toggler-right py-2" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse text-center" id="navbarCollapse">
+    <ul class="navbar-nav ml-auto my-auto">
+      
+    </ul>
+    <hr class="hidden-md-up">
+  </div>
+</nav>
+
+
+  		<div class="row">
+  			<div class="col-12 mb-4">
+  <img class="img-fluid project-img" src="/PersonalWebpageCN//imgs/CS562Proj1.jpg" alt="CS562 Project1">
+</div>
+<div class="col-lg-4 col-12 pt-3 px-4 pr-lg-5">
+  <h1>CS562 Project1</h1>
+</div>
+<div class="col-lg-8 col-12 pt-lg-3 mb-4 pl-lg-5 px-lg-0 px-4 portfolio-content">
+  <h1 id="Framework"><a href="#Framework" class="headerlink" title="Framework"></a>Framework</h1><p>Since this summer, I start learning Vulkan API and preparing for the coming game project (GAM550). In three months I made a simple wrap of Vulkan and explored some interesting graphics effects like Tile Based Lighting, Screen Space Reflection, effective shadow mapping. The wrapped API worked well during these explorations so I decide to continue use it for this class.</p>
+<p>The framework only wrapped some basic functions of Vulkan to make it easier to use (like creating buffers, images, render passes, framebuffers, pipelines, recording command buffers, etc.) so basically I have to write everything related with rendering from scratch. For this class, I will write most rendering logics in one main file so the process of building pipeline would be clear.</p>
+<h1 id="Deferred-Rendering"><a href="#Deferred-Rendering" class="headerlink" title="Deferred Rendering"></a>Deferred Rendering</h1><p>At first, I tried to make a simple deferred shading pipeline with one single parallel light which is hard-coded in shaders:</p>
+<p>Offline Pass: Rendering the scene from the perspective of camera into one color texture, one view-space normal texture, one view-space position texture and one depth-stencil texture.</p>
+<p>Deferred Pass: retrieve position, normal and color of each pixel using the textures from Offline Pass with a fill-screen rect and doing simple lambert and blinn-phong shading with a parallel light (a vector) to get final color.</p>
+<h2 id="Results"><a href="#Results" class="headerlink" title="Results"></a>Results</h2><p><img src="/PersonalWebpageCN/images/CS562Proj1/00.png" alt="View Space Normal(normalized and scaled by 0.5 then add 0.5)"></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj1/01.png" alt="View Space Position(Scaled by 0.01 then add 0.5)"></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj1/02.png" alt="Scene Albedo"></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj1/03.png" alt="Final Result"></p>
+<p>Later I tried to rebuild the view space position by multiply the clip space position(build with texture uv and depth value) with the inverse projection matrix of camera and it seems to work well.</p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj1/04.png" alt="Reconstructed view space position"></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj1/05.png" alt="Offline rendered view space position"></p>
+<h1 id="Multi-Local-Lights"><a href="#Multi-Local-Lights" class="headerlink" title="Multi Local Lights"></a>Multi Local Lights</h1><p>After implemented basic deferred shading, I followed the instructions of handout paper and implemented multi local lights rendering. Firstly, to check the correctness of drawing method, I draw the light balls with a single color.</p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj1/06.png" alt="A light ball with red color, blend mode is additive, depth test off, culling back face"><br>During this time I encountered two problems. The first one is when I tried to set depth test as read-only test(same as drawing transparent objects) to reduce overdraw of lights behind objects, the light disappears when the camera goes into its range. Then I tried to turn off face culling but then the light seems to be over bright because of drawing twice(both front and back face). Finally I gave up and turned depth test off. The second problem is when I calculate texture coordinates of light in vertex shader, they are not interpolated correctly and become distorted in final result, so then I put perspective divide of texture coordinate into fragment shader and it works fine now.<br><img src="/PersonalWebpageCN/images/CS562Proj1/07.png" alt="Background become distorted when camera come closer"></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj1/08.png" alt="Works fine when doing perspective divide in fragment shader"><br>Finally, by using instanced draw, I can draw as many as 10000 small point lights (radius varies from 10 to 30) in scene with decent frame rate on my GTX 2070 lap-top.<br><img src="/PersonalWebpageCN/images/CS562Proj1/09.png" alt="8000 point lights"></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj1/10.png" alt="10000 point lights"></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj1/11.png" alt="10000 point lights with attenuation of light calculated by distance from light source"></p>
+<h1 id="Global-Light-Shadow"><a href="#Global-Light-Shadow" class="headerlink" title="Global Light Shadow"></a>Global Light Shadow</h1><p>After implemented multi local light shading, I start working on global parallel light shadowing. Following the instructions form CS541, I rendered a depth map of scene from the perspective of light with orthogonal projection matrix onto a 1024 x 1024 depth texture in a shadow render pass<br><img src="/PersonalWebpageCN/images/CS562Proj1/12.png" alt="Shadow depth map"><br>Then in the deferred render pass, I re-project view space position of pixels back to world space using inversed view matrix of camera, then project it into light space and doing comparison with sampled depth. If sampled depth(plus a small epsilon) is smaller than the pixel depth, then set attenuation as 0, otherwise 1.<br><img src="/PersonalWebpageCN/images/CS562Proj1/13.png" alt="Rendering result"><br>Seems like the resolution of depth texture is not big enough, so I set it to 4096 x 4096.<br><img src="/PersonalWebpageCN/images/CS562Proj1/14.png" alt="4096 x 4096"><br>The edge still looks hackly, so I added a PCF filtering by sampling nearby pixels of shadow depth texture<br><img src="/PersonalWebpageCN/images/CS562Proj1/15.png" alt="20 x 20 sampling"></p>
+<h1 id="Other-Improvements"><a href="#Other-Improvements" class="headerlink" title="Other Improvements"></a>Other Improvements</h1><p>For the deferred shading, I also used stencil test to avoid overdraw. To do that, I used a depth-stencil texture instead of using pure depth texture. In the offline pass, I rendered the scene with stencil write setting and in the deferred passes, I rendered the fill-screen rect and point light spheres with stencil compare setting. Since the depth-stencil texture should be used as both attachment and sampler in same pipeline, I set the layout of the texture as depth-stencil read only.<br><img src="/PersonalWebpageCN/images/CS562Proj1/16.png" alt="roof position rendered with stencil test"></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj1/17.png" alt="roof position rendered without stencil test"></p>
+
+</div>
+
+
+      </div>
+      
+  	</div>
+
+    <!-- After footer scripts -->
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+  </body>
+</html>
