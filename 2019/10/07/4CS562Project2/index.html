@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Head tag -->
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Title -->
+  
+  <title>CS562 Project2 Moment Shadow Mapping - FAN JIN&#39;S PORTFOLIO</title>
+
+  <!--Favicon-->
+  <link rel="icon" href="favicon/favicon.ico">
+
+  <!--Description-->
+  
+      <meta name="description" content="Improvements of Framework:In this project, I did some optimizations for my framework to better fit the requirements. The first improvement is add a RG">
+  
+
+  <!--Author-->
+  
+      <meta name="author" content="Fan Jin">
+  
+
+  <!-- Pure CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css?family=Crimson+Text|Open+Sans:300,800" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/PersonalWebpageCN/css/styles.css">
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+
+  <!-- Google Analytics -->
+  
+
+</head>
+
+
+  <body>
+  	<div class="container-fluid navbar-container m-sm-5">
+      <!-- Header -->
+      <nav class="navbar navbar-toggleable-sm navbar-light px-1 py-3 my-3 mb-sm-5">
+  <a class="navbar-brand ml-2" href="/PersonalWebpageCN/">FAN JIN'S PORTFOLIO</a>
+  <button class="navbar-toggler navbar-toggler-right py-2" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse text-center" id="navbarCollapse">
+    <ul class="navbar-nav ml-auto my-auto">
+      
+    </ul>
+    <hr class="hidden-md-up">
+  </div>
+</nav>
+
+
+  		<div class="row">
+  			<div class="col-12 mb-4">
+  <img class="img-fluid project-img" src="/PersonalWebpageCN//imgs/CS562Proj2.jpg" alt="CS562 Project2 Moment Shadow Mapping">
+</div>
+<div class="col-lg-4 col-12 pt-3 px-4 pr-lg-5">
+  <h1>CS562 Project2 Moment Shadow Mapping</h1>
+</div>
+<div class="col-lg-8 col-12 pt-lg-3 mb-4 pl-lg-5 px-lg-0 px-4 portfolio-content">
+  <h1 id="Improvements-of-Framework"><a href="#Improvements-of-Framework" class="headerlink" title="Improvements of Framework:"></a>Improvements of Framework:</h1><p>In this project, I did some optimizations for my framework to better fit the requirements. The first improvement is add a RGBA32 format color attachment so that I can render the depth data in fragment shader with high precision. The second improvement is change the clear values of color attachments from black to white so that the depth value will be 1 if no geometry is draw on the pixel. One last improvement I made which is not related with this project is switching rendering model from blinn-phong to GGX BRDF.</p>
+<h1 id="Implementations"><a href="#Implementations" class="headerlink" title="Implementations:"></a>Implementations:</h1><p><strong>Shadow Map Rendering:</strong></p>
+<p>In the shadow pass, Instead of drawing nothing to color attachment and using depth frame buffer directly for shadow mapping, I render the depth value z, together with <img src="/PersonalWebpageCN/images/CS562Proj2/clip_image002.png" alt="img"> <img src="/PersonalWebpageCN/images/CS562Proj2/clip_image004.png" alt="img"> into on RGBA32_SFLOAT color attachment:</p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/00.png" alt="Image"><br><em>Rendered depth image</em><br><img src="/PersonalWebpageCN/images/CS562Proj2/01.png" alt="Image"></p>
+<p>RGBA channels of depth buffer, representing <img src="/PersonalWebpageCN/images/CS562Proj2/clip_image006.png" alt="img"> <img src="/PersonalWebpageCN/images/CS562Proj2/clip_image004.png" alt="img">  respectively.</p>
+<p><strong>Blur Implementation:</strong></p>
+<p>In order to make gaussian blur, I followed the separate filter strategy and split horizontal and vertical blur into two compute shaders. In the first shader, the horizontal filter is performed based on original depth texture and write into a staging texture of same size. In the horizontal filtered depth will be retrieved from staging texture and write back to original depth texture after performing a vertical filter. At first, I tried to done both filter in one single shader but it seems to be not work well because it requires both read and write operations on same texture, which leads to dirty results even with barrier synchronization and volatile declarations.</p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/02.png" alt="Image"><br><em>Original depth buffer</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/03.png" alt="Image"><br><em>After horizontal blur</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/04.png" alt="Image"><br><em>After vertical blur</em></p>
+<h1 id="A-Pitfall-of-Cholesky-Decomposition"><a href="#A-Pitfall-of-Cholesky-Decomposition" class="headerlink" title="A Pitfall of Cholesky Decomposition"></a>A Pitfall of Cholesky Decomposition</h1><p>When the shadow depth value is one, the f tern of Cholesky Decomposition algorithm will likely be zero, and hence results in nan or inf values of c1, c2, c3. These bad return values are likely to give weird shadow results if not handled correctly. My suggestion is to judge if the delta value of equation <img src="/PersonalWebpageCN/images/CS562Proj2/clip_image008.png" alt="img"> (i.e. <img src="/PersonalWebpageCN/images/CS562Proj2/clip_image010.png" alt="img">)<br>is larger than zero then do the Hamburger 4MSM algorithm, else return s=1, rather than judge if delta is smaller or equal to zero then return s=1, else do the Hamburger algorithm. Since a nan delta is neither larger nor smaller than zero and in the former solution, bad deltas will simply escape MSM calculation and return ones.</p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/05.png" alt="Image"><br><em>MSM implemented with the latter solution returns weird results.</em></p>
+<h1 id="Artifacts"><a href="#Artifacts" class="headerlink" title="Artifacts"></a>Artifacts</h1><p>Two artifacts are found after the implementation of MSM. One is light leaking of overlapped shadows and the other is some shadows appears to have layered effect.</p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/06.png" alt="Image"><br><em>Light leaking</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/07.png" alt="Image"><br><em>Layered shadow</em></p>
+<h1 id="Results-With-Different-Blur-Widths"><a href="#Results-With-Different-Blur-Widths" class="headerlink" title="Results With Different Blur Widths"></a>Results With Different Blur Widths</h1><p><img src="/PersonalWebpageCN/images/CS562Proj2/08.png" alt="Image"><br><em>Width: 1</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/09.png" alt="Image"><br><em>Width: 4</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/10.png" alt="Image"><br><em>Width: 15</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/11.png" alt="Image"><br><em>Width: 35</em></p>
+
+</div>
+
+
+      </div>
+      
+  	</div>
+
+    <!-- After footer scripts -->
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+  </body>
+</html>
