@@ -70,22 +70,22 @@
   <h1 id="Improvements-of-Framework"><a href="#Improvements-of-Framework" class="headerlink" title="Improvements of Framework:"></a>Improvements of Framework:</h1><p>In this project, I did some optimizations for my framework to better fit the requirements. The first improvement is add a RGBA32 format color attachment so that I can render the depth data in fragment shader with high precision. The second improvement is change the clear values of color attachments from black to white so that the depth value will be 1 if no geometry is draw on the pixel. One last improvement I made which is not related with this project is switching rendering model from blinn-phong to GGX BRDF.</p>
 <h1 id="Implementations"><a href="#Implementations" class="headerlink" title="Implementations:"></a>Implementations:</h1><p><strong>Shadow Map Rendering:</strong></p>
 <p>In the shadow pass, Instead of drawing nothing to color attachment and using depth frame buffer directly for shadow mapping, I render the depth value z, together with <img src="/PersonalWebpageCN/images/CS562Proj2/clip_image002.png" alt="img"> <img src="/PersonalWebpageCN/images/CS562Proj2/clip_image004.png" alt="img"> into on RGBA32_SFLOAT color attachment:</p>
-<p><img src="/PersonalWebpageCN/images/CS562Proj2/00.png" alt="Image"><br><em>Rendered depth image</em><br><img src="/PersonalWebpageCN/images/CS562Proj2/01.png" alt="Image"></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/00.jpg" alt="Image"><br><em>Rendered depth image</em><br><img src="/PersonalWebpageCN/images/CS562Proj2/01.jpg" alt="Image"></p>
 <p>RGBA channels of depth buffer, representing <img src="/PersonalWebpageCN/images/CS562Proj2/clip_image006.png" alt="img"> <img src="/PersonalWebpageCN/images/CS562Proj2/clip_image004.png" alt="img">  respectively.</p>
 <p><strong>Blur Implementation:</strong></p>
 <p>In order to make gaussian blur, I followed the separate filter strategy and split horizontal and vertical blur into two compute shaders. In the first shader, the horizontal filter is performed based on original depth texture and write into a staging texture of same size. In the horizontal filtered depth will be retrieved from staging texture and write back to original depth texture after performing a vertical filter. At first, I tried to done both filter in one single shader but it seems to be not work well because it requires both read and write operations on same texture, which leads to dirty results even with barrier synchronization and volatile declarations.</p>
-<p><img src="/PersonalWebpageCN/images/CS562Proj2/02.png" alt="Image"><br><em>Original depth buffer</em></p>
-<p><img src="/PersonalWebpageCN/images/CS562Proj2/03.png" alt="Image"><br><em>After horizontal blur</em></p>
-<p><img src="/PersonalWebpageCN/images/CS562Proj2/04.png" alt="Image"><br><em>After vertical blur</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/02.jpg" alt="Image"><br><em>Original depth buffer</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/03.jpg" alt="Image"><br><em>After horizontal blur</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/04.jpg" alt="Image"><br><em>After vertical blur</em></p>
 <h1 id="A-Pitfall-of-Cholesky-Decomposition"><a href="#A-Pitfall-of-Cholesky-Decomposition" class="headerlink" title="A Pitfall of Cholesky Decomposition"></a>A Pitfall of Cholesky Decomposition</h1><p>When the shadow depth value is one, the f tern of Cholesky Decomposition algorithm will likely be zero, and hence results in nan or inf values of c1, c2, c3. These bad return values are likely to give weird shadow results if not handled correctly. My suggestion is to judge if the delta value of equation <img src="/PersonalWebpageCN/images/CS562Proj2/clip_image008.png" alt="img"> (i.e. <img src="/PersonalWebpageCN/images/CS562Proj2/clip_image010.png" alt="img">)<br>is larger than zero then do the Hamburger 4MSM algorithm, else return s=1, rather than judge if delta is smaller or equal to zero then return s=1, else do the Hamburger algorithm. Since a nan delta is neither larger nor smaller than zero and in the former solution, bad deltas will simply escape MSM calculation and return ones.</p>
-<p><img src="/PersonalWebpageCN/images/CS562Proj2/05.png" alt="Image"><br><em>MSM implemented with the latter solution returns weird results.</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/05.jpg" alt="Image"><br><em>MSM implemented with the latter solution returns weird results.</em></p>
 <h1 id="Artifacts"><a href="#Artifacts" class="headerlink" title="Artifacts"></a>Artifacts</h1><p>Two artifacts are found after the implementation of MSM. One is light leaking of overlapped shadows and the other is some shadows appears to have layered effect.</p>
-<p><img src="/PersonalWebpageCN/images/CS562Proj2/06.png" alt="Image"><br><em>Light leaking</em></p>
-<p><img src="/PersonalWebpageCN/images/CS562Proj2/07.png" alt="Image"><br><em>Layered shadow</em></p>
-<h1 id="Results-With-Different-Blur-Widths"><a href="#Results-With-Different-Blur-Widths" class="headerlink" title="Results With Different Blur Widths"></a>Results With Different Blur Widths</h1><p><img src="/PersonalWebpageCN/images/CS562Proj2/08.png" alt="Image"><br><em>Width: 1</em></p>
-<p><img src="/PersonalWebpageCN/images/CS562Proj2/09.png" alt="Image"><br><em>Width: 4</em></p>
-<p><img src="/PersonalWebpageCN/images/CS562Proj2/10.png" alt="Image"><br><em>Width: 15</em></p>
-<p><img src="/PersonalWebpageCN/images/CS562Proj2/11.png" alt="Image"><br><em>Width: 35</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/06.jpg" alt="Image"><br><em>Light leaking</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/07.jpg" alt="Image"><br><em>Layered shadow</em></p>
+<h1 id="Results-With-Different-Blur-Widths"><a href="#Results-With-Different-Blur-Widths" class="headerlink" title="Results With Different Blur Widths"></a>Results With Different Blur Widths</h1><p><img src="/PersonalWebpageCN/images/CS562Proj2/08.jpg" alt="Image"><br><em>Width: 1</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/09.jpg" alt="Image"><br><em>Width: 4</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/10.jpg" alt="Image"><br><em>Width: 15</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj2/11.jpg" alt="Image"><br><em>Width: 35</em></p>
 
 </div>
 
