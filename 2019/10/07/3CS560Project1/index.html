@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Head tag -->
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Title -->
+  
+  <title>CS560 Project1：Keyframe Animation - FAN JIN&#39;S PORTFOLIO</title>
+
+  <!--Favicon-->
+  <link rel="icon" href="favicon/favicon.ico">
+
+  <!--Description-->
+  
+      <meta name="description" content="FrameworkI use the same framework as in course CS562, which I developed during summer based on C++ and Vulkan for graphics. This framework is much eas">
+  
+
+  <!--Author-->
+  
+      <meta name="author" content="Fan Jin">
+  
+
+  <!-- Pure CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css?family=Crimson+Text|Open+Sans:300,800" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/PersonalWebpageCN/css/styles.css">
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+
+  <!-- Google Analytics -->
+  
+
+</head>
+
+
+  <body>
+  	<div class="container-fluid navbar-container m-sm-5">
+      <!-- Header -->
+      <nav class="navbar navbar-toggleable-sm navbar-light px-1 py-3 my-3 mb-sm-5">
+  <a class="navbar-brand ml-2" href="/PersonalWebpageCN/">FAN JIN'S PORTFOLIO</a>
+  <button class="navbar-toggler navbar-toggler-right py-2" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse text-center" id="navbarCollapse">
+    <ul class="navbar-nav ml-auto my-auto">
+      
+    </ul>
+    <hr class="hidden-md-up">
+  </div>
+</nav>
+
+
+  		<div class="row">
+  			<div class="col-12 mb-4">
+  <img class="img-fluid project-img" src="/PersonalWebpageCN//imgs/CS560Proj1.png" alt="CS560 Project1：Keyframe Animation">
+</div>
+<div class="col-lg-4 col-12 pt-3 px-4 pr-lg-5">
+  <h1>CS560 Project1：Keyframe Animation</h1>
+</div>
+<div class="col-lg-8 col-12 pt-lg-3 mb-4 pl-lg-5 px-lg-0 px-4 portfolio-content">
+  <h1 id="Framework"><a href="#Framework" class="headerlink" title="Framework"></a>Framework</h1><p>I use the same framework as in course CS562, which I developed during summer based on C++ and Vulkan for graphics. This framework is much easier to extend and modify compared with pure Vulkan and I decided to use it for my GAM550 game project as well. For the mesh loader, I followed professor’s suggestion and adopt Assimp as basic reader. The render pipeline I used for this project is almost the same as CS562, which is a deferred, multi local light render pipeline. The difference is I added a new Vulkan pipeline (or a shader program under OpenGL definition) for skeletal mesh rendering and a new no depth-test pass for drawing joints.</p>
+<h1 id="Implementations"><a href="#Implementations" class="headerlink" title="Implementations"></a>Implementations</h1><p><strong>Key Frames &amp; Updating:</strong></p>
+<p>After loading the aiScene and loading all the meshes, I follow the instructions from OGL Dev:</p>
+<p>(<a href="http://ogldev.atspace.co.uk/www/tutorial38/tutorial38.html" target="_blank" rel="noopener">http://ogldev.atspace.co.uk/www/tutorial38/tutorial38.html</a>) and traverse all the meshes to get bones and weights and store then in a map which uses bone name as keys. Then, for each animation node, I traverse the hierarchy tree from root node to extract all the nodes that belongs to the animation and store those nodes(with their key data, parent id and ref-pos matrix) in a linear buffer in a breadth first order with node number of each tree height recorded. When updating the animation, I can traverse this buffer and update each node transforms linearly. Lastly in the shaders, I pass both per-vertex bone weights and bone transforms as SSBOs and use glVertexIndex to index them.</p>
+<p><strong>Quaternion and S-Lerp Functions:</strong></p>
+<p>For the quaternion spherical interpolation functions used in this project, I refer to build-in functions of Assimp (which is almost the same as professors) and write my own functions which takes GLM vec4 as a quaternion. This brings me a problem: The Assimp quaternion structure uses w as its first value(same as GLM built-in quaternion). At first I directly use memory-based construct function(glm::make_Mat4) to convert Assimp quaternion into vec4, which leads to weird results, later I change the construction method into assign values one by one.</p>
+<p><strong>Draw Joints:</strong></p>
+<p>At first I tried to use cylinders to indicate directions of joints but later it seems like different meshes has different joint directions, so I made a compromise and draw sphere to show positions of joints.</p>
+<p><strong>Formats and Files:</strong></p>
+<p>Since Assimp supports quite a lot kinds of mesh formats, I tried to load skeletal meshes of different formats. The result shows that it goes well with FBX format but shows weird results when loading glb format meshes.</p>
+<p><img src="/PersonalWebpageCN/images/CS560Proj1/00.png" alt="Image"><br><em>Bee meshes loaded in glb format, shows weird results.</em></p>
+<p><img src="/PersonalWebpageCN/images/CS560Proj1/01.png" alt="Image"><br><em>Same bee meshes converted into FBX format.</em></p>
+<h1 id="About-the-Videos"><a href="#About-the-Videos" class="headerlink" title="About the Videos"></a>About the Videos</h1><p>In the videos that I submitted shows two different meshes with three different animations in each. The first set of animations is what professor provided on Moodle and the other one is  a bee mesh with three animations. In order to realize animation instantiation I write a class named animation instance and instantiate three of it for each set of animations. In rendering loop, each animation instance will update its own bone transforms based on its own frame time and animation key data and store them along a linear SSBO buffer with offsets. Those transforms will then be indexed in vertex shader using glInstanceIndex and glVertexIndex.</p>
+<iframe height="498" width="510" src="//player.bilibili.com/player.html?aid=70529453&cid=122192952&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe><br><iframe height="498" width="510" src="//player.bilibili.com/player.html?aid=70529453&cid=122192969&page=2" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+</div>
+
+
+      </div>
+      
+  	</div>
+
+    <!-- After footer scripts -->
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+  </body>
+</html>
