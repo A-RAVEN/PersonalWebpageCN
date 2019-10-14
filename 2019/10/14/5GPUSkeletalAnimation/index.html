@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Head tag -->
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Title -->
+  
+  <title>使用GPU进行骨骼动画更新及蒙皮 - FAN JIN&#39;S PORTFOLIO</title>
+
+  <!--Favicon-->
+  <link rel="icon" href="favicon/favicon.ico">
+
+  <!--Description-->
+  
+      <meta name="description" content="CPU单线程动画的实现在本学期的计算机动画课程（CS560）中，我实践了骨骼动画的读取，更新及蒙皮。具体步骤如下：1：使用开源的模型读取库Assimp加载骨骼模型， 在读取完网格物体后，对于每个模型，收集对其有影响的骨骼，记录骨骼的默认矩阵及offset矩阵（offset矩阵是将顶点从模型空间转换到">
+  
+
+  <!--Author-->
+  
+      <meta name="author" content="Fan Jin">
+  
+
+  <!-- Pure CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css?family=Crimson+Text|Open+Sans:300,800" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/PersonalWebpageCN/css/styles.css">
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+
+  <!-- Google Analytics -->
+  
+
+</head>
+
+
+  <body>
+  	<div class="container-fluid navbar-container m-sm-5">
+      <!-- Header -->
+      <nav class="navbar navbar-toggleable-sm navbar-light px-1 py-3 my-3 mb-sm-5">
+  <a class="navbar-brand ml-2" href="/PersonalWebpageCN/">FAN JIN'S PORTFOLIO</a>
+  <button class="navbar-toggler navbar-toggler-right py-2" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse text-center" id="navbarCollapse">
+    <ul class="navbar-nav ml-auto my-auto">
+      
+    </ul>
+    <hr class="hidden-md-up">
+  </div>
+</nav>
+
+
+  		<div class="row">
+  			<div class="col-12 mb-4">
+  <img class="img-fluid project-img" src="/PersonalWebpageCN//imgs/GPUAnimation.jpg" alt="使用GPU进行骨骼动画更新及蒙皮">
+</div>
+<div class="col-lg-4 col-12 pt-3 px-4 pr-lg-5">
+  <h1>使用GPU进行骨骼动画更新及蒙皮</h1>
+</div>
+<div class="col-lg-8 col-12 pt-lg-3 mb-4 pl-lg-5 px-lg-0 px-4 portfolio-content">
+  <h1 id="CPU单线程动画的实现"><a href="#CPU单线程动画的实现" class="headerlink" title="CPU单线程动画的实现"></a>CPU单线程动画的实现</h1><p>在本学期的计算机动画课程（CS560）中，我实践了骨骼动画的读取，更新及蒙皮。具体步骤如下：<br>1：使用开源的模型读取库Assimp加载骨骼模型， 在读取完网格物体后，对于每个模型，收集对其有影响的骨骼，记录骨骼的默认矩阵及offset矩阵（offset矩阵是将顶点从模型空间转换到骨骼空间下的矩阵，当模型顶点乘以该矩阵后，得到的位置为相对于骨骼的位置）， 并重新组织骨骼对顶点的影响权重（保留前几个数据，在本次项目中为4个）。然后对于每个动画，遍历动画树以确认是否有骨骼为模型骨骼的祖先节点但不影响模型。将以上骨骼数据同样记录下来。<br>2：对于每个动画，记录动画中所有骨骼的关键帧，由于位移，旋转和缩放的关键帧数不一定相同。</p>
+<p>3：更新动画时， 遍历每个骨骼的关键帧序列，找到位于当前时间前后的两帧， 然后对该两帧数据进行插值计算得到当前时间下该骨骼的本地变换矩阵（对于位移及缩放进行线性插值（Lerp），对旋转进行球面插值（SLerp））， 若该骨骼没有关键帧，则使用默认变换矩阵。然后，从根部遍历骨骼树，将子骨骼乘上父骨骼的变换矩阵，从而得到每个骨骼在模型空间下的变换矩阵。</p>
+<p>4：对于蒙皮部分，需要将骨骼对顶点的影响数据传入顶点着色器中，影响数据的内容包括影响每个顶点的骨骼id以及权重值。在本次项目中，由于每个顶点的骨骼数据被限制到了4个，故可以用逐顶点数据（attribute）的形式传入为一个vec4和一个ivec4，不过为了未来的可拓展性，我将其组织成了SSBO传入，并在着色器中通过gl_VertexIndex读取。除了骨骼顶点的影响数据，还需要传入骨骼本身的变换矩阵及offset矩阵（如果不需要绘制骨骼的debug线的话，offset矩阵可以在更新动画时预先乘到骨骼动画矩阵中）。最后在顶点着色器中，将顶点坐标和发现分别乘上4个骨骼的变换矩阵，再将4个结果加权相加，便可以得到模型空间下最终的顶点位置，下面的步骤和静态模型一样。</p>
+<p>由于考虑到场景中可能会同时渲染多个模型，每个模型可能会做着不同的动画（或同一动画的不同帧），为了满足动画的实例化功能，我为每套动画申请了一个巨大的SSBO，并将该动画的所有实例数据存储在里面。每个动画实例都会将自己的数据更新到SSBO的一个分段里。</p>
+<p><img src="/PersonalWebpageCN/images/GPUAnim/00.jpg" alt="Image"></p>
+<p><em>骨骼动画更新示意图</em></p>
+<p><iframe height="498" width="510" src="//player.bilibili.com/player.html?aid=70529453&cid=122192952&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe></p>
+<p><iframe height="498" width="510" src="//player.bilibili.com/player.html?aid=70529453&cid=122192969&page=2" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe><br><em>CPU骨骼动画</em></p>
+<p>通过以上方法实现的动画有着不错的效果，不过由于是单线程执行，当动画实例的数量增加时，帧率会有明显的下降。为了明显提升动画的更新效率，使其能够大量运用于本学期的游戏项目中，我开始寻求在GPU上并行计算骨骼动画的方式。</p>
+<h1 id="重新组织关键帧数据"><a href="#重新组织关键帧数据" class="headerlink" title="重新组织关键帧数据"></a>重新组织关键帧数据</h1><p>若想在GPU上更新动画，Compute shader大概是不二的选择，然而我并不能简单地将CPU上的逻辑直接写道shader里，毕竟glsl里没法存链表形式的骨骼树。因此，我对动画树进行了广度优先遍历，将所有的动画节点线性地存入一个数组中，同时再加上树每一层节点数的数组，做成两个SSBO。这样我只需线性地读取数组中地内容便可以更新动画矩阵了。除了节点数据，之外，每个节点地关键帧数据均以vec4数组地形式存储，并以std140格式传入，关键帧的时间单独以float数组形式存储，以std430格式传入。</p>
+<p><img src="/PersonalWebpageCN/images/GPUAnim/01.jpg" alt="Image"></p>
+<h1 id="Compute-Shader计算步骤"><a href="#Compute-Shader计算步骤" class="headerlink" title="Compute Shader计算步骤"></a>Compute Shader计算步骤</h1><p>为了实现高效的并行化，我将节点矩阵的计算分为以下几步：<br>1：每个线程并行计算节点的本地变换矩阵，将结果存在共享矩阵数组中，由于本地变换矩阵不涉及父子关系，故可以完全并行地完成。计算完成后进行barrier同步。<br>2：按顺序并行计算动画树每一层节点地模型空间变换矩阵，没计算完一层进行一次barrier同步，由于位于同一层中的节点没有依赖关系，故同样可以并行地完成计算。计算结果覆盖步骤1中地数据。<br>3：将共享数组中地矩阵并行地拷贝到该实例的输出SSBO中。<br>计算完成后地蒙皮步骤与CPU更新时没有什么区别，这样，我便成功地实现了在GPU上更新动画的功能。</p>
+<p><iframe height="498" width="510" src="//player.bilibili.com/player.html?aid=71207243&cid=123379688&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe></p>
+<h1 id="Bug及需要改进的地方"><a href="#Bug及需要改进的地方" class="headerlink" title="Bug及需要改进的地方"></a>Bug及需要改进的地方</h1><p>在实现GPU动画后的测试中，我发现了一个bug，该算法在同学的电脑上（GTX 970 Ti）运行时无法正确地播放动画，通过RenderDoc调试后发现计算出来的矩阵值变为了NaN。事后发现这个bug似乎时驱动造成的。不过为了保证代码的通用性，我还是做了进一步调试，发现问题可能是在关键帧插值时delta值出现了-0现象，在将delta进行了clamp处理后在旧的驱动下问题也消失了。除了以上这个bug，我认为这个算法还有可以优化的地方，比如在查找插值关键帧时，我使用了线性查找。之后我会尝试将其换为二分法查找。</p>
+
+</div>
+
+
+      </div>
+      
+  	</div>
+
+    <!-- After footer scripts -->
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+  </body>
+</html>
