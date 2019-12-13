@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Head tag -->
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Title -->
+  
+  <title>CS562 Project3 IBL, PBR, Tone Mapping - FAN JIN&#39;S PORTFOLIO</title>
+
+  <!--Favicon-->
+  <link rel="icon" href="favicon/favicon.ico">
+
+  <!--Description-->
+  
+      <meta name="description" content="CS562, Fall 2019
+October 30th, 2019
+Change of FrameworkIn this project, I changed the framework to the game engine made for my GAM550 course. Since I ">
+  
+
+  <!--Author-->
+  
+      <meta name="author" content="Fan Jin">
+  
+
+  <!-- Pure CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css?family=Crimson+Text|Open+Sans:300,800" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/PersonalWebpageCN/css/styles.css">
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+
+  <!-- Google Analytics -->
+  
+
+</head>
+
+
+  <body>
+  	<div class="container-fluid navbar-container m-sm-5">
+      <!-- Header -->
+      <nav class="navbar navbar-toggleable-sm navbar-light px-1 py-3 my-3 mb-sm-5">
+  <a class="navbar-brand ml-2" href="/PersonalWebpageCN/">FAN JIN'S PORTFOLIO</a>
+  <button class="navbar-toggler navbar-toggler-right py-2" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse text-center" id="navbarCollapse">
+    <ul class="navbar-nav ml-auto my-auto">
+      
+    </ul>
+    <hr class="hidden-md-up">
+  </div>
+</nav>
+
+
+  		<div class="row">
+  			<div class="col-12 mb-4">
+  <img class="img-fluid project-img" src="/PersonalWebpageCN//imgs/CS562Proj3.jpg" alt="CS562 Project3 IBL, PBR, Tone Mapping">
+</div>
+<div class="col-lg-4 col-12 pt-3 px-4 pr-lg-5">
+  <h1>CS562 Project3 IBL, PBR, Tone Mapping</h1>
+</div>
+<div class="col-lg-8 col-12 pt-lg-3 mb-4 pl-lg-5 px-lg-0 px-4 portfolio-content">
+  <p>CS562, Fall 2019</p>
+<p>October 30th, 2019</p>
+<h2 id="Change-of-Framework"><a href="#Change-of-Framework" class="headerlink" title="Change of Framework"></a>Change of Framework</h2><p>In this project, I changed the framework to the game engine made for my GAM550 course. Since I am the only graphics developer in my team and the game engine uses same graphics framework(based on Vulkan) as the previous one, I have no problem in implementing these features.</p>
+<h2 id="PART-A"><a href="#PART-A" class="headerlink" title="PART A"></a>PART A</h2><h3 id="Diffuse-Irradiance-amp-Tone-Mapping"><a href="#Diffuse-Irradiance-amp-Tone-Mapping" class="headerlink" title="Diffuse Irradiance &amp; Tone Mapping:"></a>Diffuse Irradiance &amp; Tone Mapping:</h3><p>The diffuse irradiance shading part of this project is simple. In a deferred shading pipeline, I sampled the view-space normal, doing a normalize, then directly do a sphere sampling on irradiance map using that normal. Lastly, the result color should be divided by PI, if it is not done during calculation of map. In this project, the irradiance map given by professor seems to work well without divide by PI. For the tone mapping, I choose variable e as 2.</p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj3/00.jpg" alt="Image"></p>
+<h3 id="Specular-PBR"><a href="#Specular-PBR" class="headerlink" title="Specular PBR:"></a>Specular PBR:</h3><p>According to the handout paper, the specular PBR needs a pre-generated mipmap chain of skybox texture. Since Vulkan does not natively support mipmap generation ( it supports mipmap image memory allocation however), I have to generate mipmap manually, with the help of Vulkan Tutorial (<a href="https://vulkan-tutorial.com/Generating_Mipmaps)" target="_blank" rel="noopener">https://vulkan-tutorial.com/Generating_Mipmaps)</a>. Generating mipmap in Vulkan can be done by following steps:</p>
+<p>1: Allocate a mipmap image object.</p>
+<p>2: Read-in pixel data and copy it to the first mipmap level of the image.</p>
+<p>3: Switch layout of current level to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL and the layout of next level to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, doing VkCmdBlitImage, which performs scaled-size data transfer from current level to next level. After that, switch layout of current level to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL and next level to VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL. Repeating these steps recursively till last level of mipmap chain.</p>
+<p><strong>Choose of BRDF model:</strong></p>
+<p>Same as the Ray-tracing class, I choose GGX model for BRDF instead of Phong model. I followed instructions to generate Hammersley random numbers on CPU and pass those numbers to shader using uniform buffer. In the fragment shader, I performed importance sampling according to the Unreal Engine paper</p>
+<p>(<a href="https://cdn2.unrealengine.com/Resources/files/2013SiggraphPresentationsNotes-26915738.pdf" target="_blank" rel="noopener">https://cdn2.unrealengine.com/Resources/files/2013SiggraphPresentationsNotes-26915738.pdf</a>) and choose mipmap level according to the equation given by handout paper(with a little adjustment, I changed D into D <em> NdotH / (4 </em> VdotH), which is the pdf of GGX BRDF).</p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj3/01.jpg" alt="Image"></p>
+<p><em>Roughness = 0.1</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj3/02.jpg" alt="Image"></p>
+<p><em>Roughness = 0.3</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj3/03.jpg" alt="Image"></p>
+<p><em>Roughness = 0.6</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj3/04.jpg" alt="Image"></p>
+<p><em>Roughness = 0.9</em></p>
+<h2 id="PART-B"><a href="#PART-B" class="headerlink" title="PART B"></a>PART B</h2><p><strong>Calculating Diffuse Irradiance Map:</strong></p>
+<p>In this part, I implemented both traditional “ray-traced” irradiance map and spherical harmonic irradiance map in order to compare their differences. The traditional irradiance map is computed on GPU using a graphics render pipeline and the random seed is passed in through uniform buffer object. For the spherical harmonic irradiance map, since it only contains 9 values, I do the calculation on CPU according to the algorithm given by handout paper.</p>
+<p>_NewPort_Loft_</p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj3/05.jpg" alt="Image"></p>
+<p><em>Traditional</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj3/06.jpg" alt="Image"></p>
+<p><em>Spherical Harmonic</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj3/07.jpg" alt="Image"></p>
+<p><em>TropicalBeach</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj3/08.jpg" alt="Image"></p>
+<p><em>Traditional</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj3/09.jpg" alt="Image"></p>
+<p><em>Spherical Harmonic</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj3/10.jpg" alt="Image"></p>
+<p>_Barce_Rooftop_</p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj3/11.jpg" alt="Image"></p>
+<p><em>Traditional</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj3/12.jpg" alt="Image"></p>
+<p><em>Spherical Harmonic</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj3/13.jpg" alt="Image"></p>
+<p>In general, both methods have similar results. The very difference is that the traditional method takes tens of seconds to converge even with GPU acceleration while Spherical Harmonic method achieves similar results in less than a second on CPU.</p>
+
+</div>
+
+
+      </div>
+      
+  	</div>
+
+    <!-- After footer scripts -->
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+  </body>
+</html>
