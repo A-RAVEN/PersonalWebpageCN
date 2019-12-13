@@ -8,12 +8,15 @@
 
   <!-- Title -->
   
-  <title>FAN JIN&#39;S PORTFOLIO</title>
+  <title>CS560 Project3 Inverse Kinematics - FAN JIN&#39;S PORTFOLIO</title>
 
   <!--Favicon-->
   <link rel="icon" href="favicon/favicon.ico">
 
   <!--Description-->
+  
+      <meta name="description" content="Choose of Algorithm:
+After searching on internet, I think Cyclic Coordinate Descent, as a numerical method, is a more practicable algorithm compared w">
   
 
   <!--Author-->
@@ -58,42 +61,26 @@
 
 
   		<div class="row">
-  			
-    <div class="col-md-6 col-12 mb-4">
-  <div class="hovereffect">
-    <a href="/PersonalWebpageCN/2019/12/13/8CS562Project4/">
-      <img class="img-fluid portfolio-img" src="/PersonalWebpageCN//imgs/CS562Proj4.jpg" alt="CS562 Project4 Ambient Occlusion">
-      <div class="overlay">
-        <span class="overlay-text">CS562 Project4 Ambient Occlusion</span>
-      </div>
-    </a>
-  </div>
+  			<div class="col-12 mb-4">
+  <img class="img-fluid project-img" src="/PersonalWebpageCN//imgs/CS560Proj3.jpg" alt="CS560 Project3 Inverse Kinematics">
 </div>
-
-
-    <div class="col-md-6 col-12 mb-4">
-  <div class="hovereffect">
-    <a href="/PersonalWebpageCN/2019/12/13/7CS560Project3/">
-      <img class="img-fluid portfolio-img" src="/PersonalWebpageCN//imgs/CS560Proj3.jpg" alt="CS560 Project3 Inverse Kinematics">
-      <div class="overlay">
-        <span class="overlay-text">CS560 Project3 Inverse Kinematics</span>
-      </div>
-    </a>
-  </div>
+<div class="col-lg-4 col-12 pt-3 px-4 pr-lg-5">
+  <h1>CS560 Project3 Inverse Kinematics</h1>
 </div>
+<div class="col-lg-8 col-12 pt-lg-3 mb-4 pl-lg-5 px-lg-0 px-4 portfolio-content">
+  <p><strong>Choose of Algorithm:</strong></p>
+<p>After searching on internet, I think Cyclic Coordinate Descent, as a numerical method, is a more practicable algorithm compared with analytical methods. It can be implemented both easily and efficiently. </p>
+<p><strong>Implementations:</strong></p>
+<p>The implementation of CCD are mostly done in one single function(function SetModleSpaceIkPosition at line 691 in file AnimatedMesh.cpp), in which bones from a given IK chain are traversed and updated for 10 times according to a given end effector position to get a result, The end effector positions are assumed to be under model space and will be draw as a red ball. To build an IK chain, I wrote a function AddIK (at line 291 in file AnimatedMesh.cpp), which takes names of start bone and end bone, traverse the skeleton hierarchy using function TraverseGetBones( at line 383 in file AnimatedMesh.cpp) to find the whole chain from start to end, and save bone indices into a map container.</p>
+<p><strong>Pose Blending:</strong></p>
+<p>To Show the process that bones move from animation pose to IK effector pose, I add a float blending value in SetModleSpaceIkPosition function, which blend position between end bone position and end effector position to get “true” position for IK calculation.</p>
+<p><img src="/PersonalWebpageCN/images/CS560Proj3/00.jpg" alt="Image"></p>
+<p><em>Character’s arm blending from animation pose to IK pose</em></p>
+<p><strong>Explanation About Videos:</strong></p>
+<p>The first video shows IK effect of a skeletal mesh’s arm and leg, the IK chain for leg starts at upper leg and ends at first bone of foot and the IK chain for arm starts at shoulder and ends at hand.</p>
+<p>The second video shows the blend effect between animation poses and IK poses.</p>
 
-
-    <div class="col-md-6 col-12 mb-4">
-  <div class="hovereffect">
-    <a href="/PersonalWebpageCN/2019/12/13/6CS562Project3/">
-      <img class="img-fluid portfolio-img" src="/PersonalWebpageCN//imgs/CS562Proj3.jpg" alt="CS562 Project3 IBL, PBR, Tone Mapping">
-      <div class="overlay">
-        <span class="overlay-text">CS562 Project3 IBL, PBR, Tone Mapping</span>
-      </div>
-    </a>
-  </div>
 </div>
-
 
 
       </div>

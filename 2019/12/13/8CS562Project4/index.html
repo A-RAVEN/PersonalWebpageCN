@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Head tag -->
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Title -->
+  
+  <title>CS562 Project4 Ambient Occlusion - FAN JIN&#39;S PORTFOLIO</title>
+
+  <!--Favicon-->
+  <link rel="icon" href="favicon/favicon.ico">
+
+  <!--Description-->
+  
+      <meta name="description" content="CS562, Fall 2019
+November 26th, 2019
+Implementations:Robot Model Source:
+https://skfb.ly/6LTRp
+Author : kurojishi
+AO Calculating:
+For this part, I sim">
+  
+
+  <!--Author-->
+  
+      <meta name="author" content="Fan Jin">
+  
+
+  <!-- Pure CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css?family=Crimson+Text|Open+Sans:300,800" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/PersonalWebpageCN/css/styles.css">
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+
+  <!-- Google Analytics -->
+  
+
+</head>
+
+
+  <body>
+  	<div class="container-fluid navbar-container m-sm-5">
+      <!-- Header -->
+      <nav class="navbar navbar-toggleable-sm navbar-light px-1 py-3 my-3 mb-sm-5">
+  <a class="navbar-brand ml-2" href="/PersonalWebpageCN/">FAN JIN'S PORTFOLIO</a>
+  <button class="navbar-toggler navbar-toggler-right py-2" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse text-center" id="navbarCollapse">
+    <ul class="navbar-nav ml-auto my-auto">
+      
+    </ul>
+    <hr class="hidden-md-up">
+  </div>
+</nav>
+
+
+  		<div class="row">
+  			<div class="col-12 mb-4">
+  <img class="img-fluid project-img" src="/PersonalWebpageCN//imgs/CS562Proj4.jpg" alt="CS562 Project4 Ambient Occlusion">
+</div>
+<div class="col-lg-4 col-12 pt-3 px-4 pr-lg-5">
+  <h1>CS562 Project4 Ambient Occlusion</h1>
+</div>
+<div class="col-lg-8 col-12 pt-lg-3 mb-4 pl-lg-5 px-lg-0 px-4 portfolio-content">
+  <p>CS562, Fall 2019</p>
+<p>November 26th, 2019</p>
+<h3 id="Implementations"><a href="#Implementations" class="headerlink" title="Implementations:"></a>Implementations:</h3><p><strong>Robot Model Source:</strong></p>
+<p><a href="https://skfb.ly/6LTRp" target="_blank" rel="noopener">https://skfb.ly/6LTRp</a></p>
+<p>Author : kurojishi</p>
+<p><strong>AO Calculating:</strong></p>
+<p>For this part, I simply followed instructions in handout paper and wrote a fill-screen rect pass, which takes scene depth and normal texture as input and draw ambient occlusion coefficients on a RGBA8 texture. I choose 20 points to integrate final result for each pixel. For the scale and contrast factors s and k, I simply use ones. </p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj4/00.jpg" alt="Image"></p>
+<p><em>AO calculation result with visible noises, AO radius is 1</em></p>
+<p><strong>Blur Implementation:</strong></p>
+<p>According to the handout paper, Bilateral filter cannot be divided into vertical and horizontal parts, so I instead implement filter in another fill-screen graphics render pass. In the fragment shader, I choose 5 as the window size of filter and doing both spatial and range weight calculation in a 5x5 for loop.</p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj4/01.jpg" alt="Image"></p>
+<p><em>5x5 bilateral filtered result, looks smoother. For some parts the noise is still visible but blurred</em></p>
+<p><strong>Try different AO radius:</strong></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj4/02.jpg" alt="Image"></p>
+<p><em>Radius = 0.5</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj4/03.jpg" alt="Image"></p>
+<p><em>Radius = 1.5</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj4/04.jpg" alt="Image"></p>
+<p><em>Radius = 5.0</em></p>
+<h3 id="Results"><a href="#Results" class="headerlink" title="Results"></a>Results</h3><p><strong>View 1(Same as previous screen shots):</strong></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj4/05.jpg" alt="Image"></p>
+<p><em>Without AO</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj4/06.jpg" alt="Image"></p>
+<p><em>AO Radius = 2</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj4/07.jpg" alt="Image"></p>
+<p><em>AO Radius = 5</em></p>
+<p><strong>View 2:</strong></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj4/08.jpg" alt="Image"></p>
+<p><em>Not Filtered</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj4/09.jpg" alt="Image"></p>
+<p><em>Filtered</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj4/10.jpg" alt="Image"></p>
+<p><em>Without AO</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj4/11.jpg" alt="Image"></p>
+<p><em>AO Radius = 2</em></p>
+<p><img src="/PersonalWebpageCN/images/CS562Proj4/12.jpg" alt="Image"></p>
+<p><em>AO Radius = 5</em></p>
+
+</div>
+
+
+      </div>
+      
+  	</div>
+
+    <!-- After footer scripts -->
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+  </body>
+</html>
