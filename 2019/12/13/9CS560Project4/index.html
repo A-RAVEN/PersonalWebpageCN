@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Head tag -->
+  <head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Title -->
+  
+  <title>CS560 Project4 Mechanics - FAN JIN&#39;S PORTFOLIO</title>
+
+  <!--Favicon-->
+  <link rel="icon" href="favicon/favicon.ico">
+
+  <!--Description-->
+  
+      <meta name="description" content="CS560, Fall 2019
+December 12th
+Choose of Mechanism:For this project, I choose cloth model for implementation, for the solution method, I choose Runge-">
+  
+
+  <!--Author-->
+  
+      <meta name="author" content="Fan Jin">
+  
+
+  <!-- Pure CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css?family=Crimson+Text|Open+Sans:300,800" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/PersonalWebpageCN/css/styles.css">
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+
+  <!-- Google Analytics -->
+  
+
+</head>
+
+
+  <body>
+  	<div class="container-fluid navbar-container m-sm-5">
+      <!-- Header -->
+      <nav class="navbar navbar-toggleable-sm navbar-light px-1 py-3 my-3 mb-sm-5">
+  <a class="navbar-brand ml-2" href="/PersonalWebpageCN/">FAN JIN'S PORTFOLIO</a>
+  <button class="navbar-toggler navbar-toggler-right py-2" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse text-center" id="navbarCollapse">
+    <ul class="navbar-nav ml-auto my-auto">
+      
+    </ul>
+    <hr class="hidden-md-up">
+  </div>
+</nav>
+
+
+  		<div class="row">
+  			<div class="col-12 mb-4">
+  <img class="img-fluid project-img" src="/PersonalWebpageCN//imgs/CS560Proj4.jpg" alt="CS560 Project4 Mechanics">
+</div>
+<div class="col-lg-4 col-12 pt-3 px-4 pr-lg-5">
+  <h1>CS560 Project4 Mechanics</h1>
+</div>
+<div class="col-lg-8 col-12 pt-lg-3 mb-4 pl-lg-5 px-lg-0 px-4 portfolio-content">
+  <p>CS560, Fall 2019</p>
+<p>December 12th</p>
+<h2 id="Choose-of-Mechanism"><a href="#Choose-of-Mechanism" class="headerlink" title="Choose of Mechanism:"></a>Choose of Mechanism:</h2><p>For this project, I choose cloth model for implementation, for the solution method, I choose Runge-Kutta-4 and for the contact force method, I choose Impulse based force. </p>
+<h2 id="Implementation-Detail"><a href="#Implementation-Detail" class="headerlink" title="Implementation Detail:"></a>Implementation Detail:</h2><p><strong>Classes:</strong></p>
+<p>In order to implement cloth animation properly, I write three classes. The first class is the ball rigid body which contains properties of rigid body and ball collider. This object is the main part of the simulation, playing as both cloth particles and collider balls in the scene. The second class is the spring class, which contains indices of two ball rigid bodies of its two sides, a rest length value and a coefficient value K. The third class is the updater class which loops over all the rigid bodies and springs, adding forces and doing RK4 updating each frame.</p>
+<p><strong>Setting Up Cloth:</strong></p>
+<p>To build a cloth, I made a 49 by 49 grid structure together with static mesh, for each points in the grid, I placed a ball rigid body and connect each ball to its 8 neighbors with a spring object.</p>
+<p><strong>Updating:</strong></p>
+<p>During each frame, the updater loops over all rigid bodies, doing collision checks and applying colliding forces for each ball. In order to prevent cloth from weird results, I disabled collisions between cloth particles by giving them same collider channel. Then the updater loops over all the springs and apply spring forces to balls of its two sides using Hooke’s law. After that I loops over all the balls again and apply gravity to them (I choose 10 as the gravity acceleration). Lastly, I do the RK4 solving to update all the rigid bodies. To keep the robustness of the simulation, I clamp the delta time to make it less than 0.02 seconds.</p>
+<p><strong>Describe of Video:</strong> </p>
+<p>The video shows physics simulation of one cloth and two rigid balls in the scene. The four angles of the cloth and two balls are set to kinematic at first.</p>
+
+</div>
+
+
+      </div>
+      
+  	</div>
+
+    <!-- After footer scripts -->
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+  </body>
+</html>
